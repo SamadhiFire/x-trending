@@ -39,16 +39,15 @@ DEFAULT_CATEGORIES: List[str] = [
     "Travel",
     "Gaming",
     "Sports",
-    "Health&Fitness",
+    "Health & Fitness",
     "cryptocurrency",
     "cars",
     "music",
     "dance",
     "celebrity",
     "relationship",
-    "movies&tv",
-    "nature&outdoors",
-    "Entertainment",
+    "Movies & TV",
+    "Nature & Outdoors",
     "food",
     "meme",
     "beauty",
@@ -69,9 +68,8 @@ CATEGORY_GROUPS: Dict[str, List[str]] = {
     "Music / Dance / Entertainment": [
         "music",
         "dance",
-        "Entertainment",
         "celebrity",
-        "movies&tv",
+        "Movies & TV",
         "anime",
     ],
     "Viral Culture / Meme / Social Buzz": [
@@ -89,8 +87,8 @@ CATEGORY_GROUPS: Dict[str, List[str]] = {
     ],
     "Lifestyle / Outdoor / Travel": [
         "Travel",
-        "nature&outdoors",
-        "Health&Fitness",
+        "Nature & Outdoors",
+        "Health & Fitness",
         "Home & Garden",
     ],
     "News / Society / Sensitive Topics": [
@@ -112,6 +110,8 @@ REQUEST_TIMEOUT = _int_env("REQUEST_TIMEOUT", 30)
 MAX_RETRIES = _int_env("MAX_RETRIES", 3)
 MAX_TRENDS_PER_CATEGORY = _int_env("MAX_TRENDS_PER_CATEGORY", 10)
 MAX_TWEETS_PER_TREND = _int_env("MAX_TWEETS_PER_TREND", 5)
+MAX_CANDIDATES_PER_CATEGORY = _int_env("MAX_CANDIDATES_PER_CATEGORY", 30)
+SCROLLS_PER_CATEGORY = _int_env("SCROLLS_PER_CATEGORY", 7)
 MAX_ITEMS_PER_GROUP = _int_env("MAX_ITEMS_PER_GROUP", 7)
 TOP_ACTION_COUNT = _int_env("TOP_ACTION_COUNT", 5)
 LOOKBACK_HOURS = _int_env("LOOKBACK_HOURS", 24)

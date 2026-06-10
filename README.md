@@ -2,15 +2,17 @@
 
 Daily X trend pipeline for AI video and AI music growth operations.
 
-The report is designed for off-platform acquisition, not media commentary:
+## Flow
 
-1. Scrape X trending tweets for `Global`.
-2. Keep tweets published in the past 24 hours.
-3. Merge source categories into 6 operating groups.
-4. Pick the hottest 7 tweets in each group.
-5. Use an optional OpenAI-compatible LLM to write short Chinese summaries.
-6. Put the 5 best traffic-driving actions at the end.
-7. Send the report to Feishu and save a JSON copy.
+1. Open X Global Trending with Playwright.
+2. Inject `X_COOKIES` to keep the X login session.
+3. Click each configured category card.
+4. Scroll the Popular today area to collect tweet candidates.
+5. Keep tweets from the past 24 hours.
+6. Merge source categories into 6 operating groups.
+7. Keep the hottest 7 tweets in each group.
+8. Optionally use an OpenAI-compatible LLM for summaries and traffic actions.
+9. Send the report to Feishu and save a JSON copy.
 
 ## Feishu Output
 
@@ -54,7 +56,7 @@ AI / Tech / Creator Tools
 Technology, Science, Business & Finance, cryptocurrency
 
 Music / Dance / Entertainment
-music, dance, Entertainment, celebrity, movies&tv, anime
+music, dance, celebrity, Movies & TV, anime
 
 Viral Culture / Meme / Social Buzz
 meme, relationship, fashion, beauty, food, Pets
@@ -63,26 +65,10 @@ Gaming / Sports / Youth Culture
 Gaming, Sports, cars
 
 Lifestyle / Outdoor / Travel
-Travel, nature&outdoors, Health&Fitness, Home & Garden
+Travel, Nature & Outdoors, Health & Fitness, Home & Garden
 
 News / Society / Sensitive Topics
 News, religion
-```
-
-## Ranking
-
-Each group keeps at most 7 tweets from the past 24 hours.
-
-Score:
-
-```text
-score = views * 0.4 + likes * 2 + retweets * 4 + replies * 3
-```
-
-If views are missing:
-
-```text
-score = likes * 2 + retweets * 4 + replies * 3
 ```
 
 ## Local Setup
@@ -98,40 +84,37 @@ copy .env.example .env
 Fill `.env`:
 
 ```dotenv
-FEISHU_WEBHOOK_URL=https://open.feishu.cn/open-apis/bot/v2/hook/...
-FEISHU_SECRET=
-
-LLM_ENABLED=true
-LLM_API_KEY=
-LLM_BASE_URL=https://your-openai-compatible-endpoint
-LLM_MODEL=
-
 X_COUNTRIES=Global
-OUTPUT_FORMAT=both
-DRY_RUN=false
+X_EXPLORE_URL=https://x.com/i/jf/global-trending/home
+X_COOKIES=auth_token=...; ct0=...; guest_id=...
+
+OUTPUT_FORMAT=json
+DRY_RUN=true
+LLM_ENABLED=false
 ```
 
-Run:
-
-```bash
-python main.py
-```
-
-Dry run without sending to Feishu:
+Dry run:
 
 ```bash
 python main.py --output-format json --dry-run
+```
+
+Check category clicking:
+
+```bash
+python scripts\check_x_categories.py --headed --use-chrome
 ```
 
 ## GitHub Actions
 
 The workflow is in `.github/workflows/daily-trending.yml`.
 
-It runs every day at `00:30 UTC`, which is `08:30 Asia/Shanghai`, and can also be started manually from the GitHub Actions page.
+It runs every day at `00:30 UTC`, which is `08:30 Asia/Shanghai`, and can also be started manually.
 
-Required repository secret:
+Required repository secrets:
 
-- `FEISHU_WEBHOOK_URL`
+- `X_COOKIES`
+- `FEISHU_WEBHOOK_URL` if exporting to Feishu
 
 Optional repository secrets:
 
@@ -140,23 +123,10 @@ Optional repository secrets:
 - `LLM_BASE_URL`
 - `LLM_MODEL`
 
-Do not put API keys in source files, README, `.env.example`, or normal GitHub variables.
+Do not put API keys or X cookies in source files, README, `.env.example`, or normal GitHub variables.
 
-## X Page Calibration
+## Notes
 
-The scraper has a generic parser for X tweet articles, but country/category switching can depend on the exact page URL, account state, or frontend controls.
+GitHub Actions can run this automatically. The runner installs Python dependencies and Playwright browsers each run; browser files are cached with `actions/cache` to reduce repeated download time.
 
-If the category page has a stable URL, set:
-
-```dotenv
-X_CATEGORY_URL_TEMPLATE=https://x.com/your/path?country={country_slug}&category={category_slug}
-```
-
-Available template variables:
-
-- `{country}`
-- `{category}`
-- `{country_slug}`
-- `{category_slug}`
-
-If switching requires clicking controls in the browser, update `TrendingScraper._fetch_page()` or add a browser interaction step before extracting trend terms and tweets.
+X cookies expire or may be invalidated after logout/password changes. If Actions starts redirecting to login, update the `X_COOKIES` secret.

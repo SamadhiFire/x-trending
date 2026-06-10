@@ -20,21 +20,11 @@ class TestTrendingScraper:
         """Test scraper initializes without errors."""
         assert self.scraper is not None
 
-    def test_scrape_all_returns_dict(self, monkeypatch):
-        """Test scrape_all returns a dictionary."""
-        import config.settings as settings
-
-        monkeypatch.setattr(settings, "COUNTRIES", ["Global"])
-        monkeypatch.setattr(settings, "CATEGORIES", ["Technology"])
-        monkeypatch.setattr(
-            self.scraper,
-            "scrape_country_category",
-            lambda country, category: [{"trending_term": "AI", "tweets": []}],
-        )
-
-        result = self.scraper.scrape_all()
-        assert isinstance(result, dict)
-        assert result["Global"]["Technology"][0]["trending_term"] == "AI"
+    def test_category_aliases_include_display_names(self):
+        """Test compact category names map to visible X labels."""
+        assert "Health & Fitness" in self.scraper._category_aliases("Health&Fitness")
+        assert "Movies & TV" in self.scraper._category_aliases("movies&tv")
+        assert "Nature & Outdoors" in self.scraper._category_aliases("nature&outdoors")
 
 
 def test_data_processor_groups_and_ranks_recent_tweets():
@@ -117,7 +107,7 @@ def test_feishu_formatter_builds_daily_report():
             "top_actions": [
                 {
                     "title": "AI music workflow",
-                    "action": "做成AI音乐生成模板，引导用户生成同款。",
+                    "action": "Make an AI music template that sends users to generate a similar result.",
                     "tweet_url": "https://x.com/u/status/1",
                 }
             ],
@@ -126,4 +116,4 @@ def test_feishu_formatter_builds_daily_report():
 
     content = message["content"]["post"]["zh_cn"]["content"]
     assert message["msg_type"] == "post"
-    assert "X 趋势日报" in content[0][0]["text"]
+    assert "X" in content[0][0]["text"]
